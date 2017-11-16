@@ -16,7 +16,7 @@ def load_data():
 
     # origin price
     loans.loan_amount = 5**loans.loan_amount
-    loans_sum.loan_sum = 5 ** loans_sum.loan_sum
+    loans_sum.loan_sum = 5 ** loans_sum.loan_sum - 1
     orders.price = 5 ** orders.price
     orders.discount = 5 ** orders.discount - 1
     users.limit = 5 ** users.limit -1
@@ -32,6 +32,10 @@ def load_data():
     loans_new.reset_index(drop=False, inplace=True)
     loans_new.columns = ['{}_{}'.format(i[1], i[0]) for i in loans_new.columns]
     loans_new = loans_new.rename(index=str, columns={"_uid": "uid"})
+
+    t = loans_new.merge(loans_sum, on="uid", how="left")
+    t["11_loan_amount"][pd.notnull(t.loan_sum)] = t.loan_sum
+    loans_new = t.drop(["month", "loan_sum"], axis = 1)
 
     # orders
     orders['Date'] = pd.to_datetime(orders['buy_time'], errors='coerce')

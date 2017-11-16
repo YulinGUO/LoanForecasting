@@ -24,7 +24,7 @@ def load_data():
     for month in [8, 9, 10, 11, 12]:
         user_info = cummulate_data_by_month(user_info, month)
 
-    for month in [8, 9, 10, 11]:
+    for month in [8, 9, 10]:
         lm = LM.format(month)
         lc = LC.format(month)
         user_info[lm] = user_info[lm] - user_info[lc]
@@ -36,13 +36,6 @@ def load_data():
     df9 = add_target_by_month(df9, 9, user_info)
     df9 = df9.rename(columns=remove_month_rename)
     df10 = get_df_by_month(user_info, '10')
-    ####
-    real11 = pd.read_csv(INPUT_PATH+"t_loan_sum.csv")
-    df10 = add_target_by_month(df10, 10, user_info)
-    t = df10.merge(real11, on="uid", how="left")
-    t[TARGET][pd.notnull(t.loan_sum)] = 5**t.loan_sum-1
-    df10 = t.drop(["month", "loan_sum"], axis = 1)
-    ####
     df10 = df10.rename(columns=remove_month_rename)
     df11 = get_df_by_month(user_info, '11')
     df11 = df11.rename(columns=remove_month_rename)
