@@ -24,6 +24,11 @@ def load_data():
     for month in [8, 9, 10, 11, 12]:
         user_info = cummulate_data_by_month(user_info, month)
 
+    for month in [8, 9, 10, 11]:
+        lm = LM.format(month)
+        lc = LC.format(month)
+        user_info[lm] = user_info[lm] - user_info[lc]
+
     df8 = get_df_by_month(user_info, '8')
     df8 = add_target_by_month(df8, 8, user_info)
     df8 = df8.rename(columns=remove_month_rename)
