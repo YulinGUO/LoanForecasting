@@ -36,6 +36,7 @@ def load_data():
     df9 = add_target_by_month(df9, 9, user_info)
     df9 = df9.rename(columns=remove_month_rename)
     df10 = get_df_by_month(user_info, '10')
+    df10 = add_target_by_month(df10, 10, user_info)
     df10 = df10.rename(columns=remove_month_rename)
     df11 = get_df_by_month(user_info, '11')
     df11 = df11.rename(columns=remove_month_rename)
