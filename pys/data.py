@@ -18,8 +18,8 @@ def load_data():
     loans.loan_amount = 5**loans.loan_amount
     loans_sum.loan_sum = 5 ** loans_sum.loan_sum
     orders.price = 5 ** orders.price
-    orders.discount = 5 ** orders.discount
-    users.limit = 5 ** users.limit
+    orders.discount = 5 ** orders.discount - 1
+    users.limit = 5 ** users.limit -1
 
     # loans
     loans['Date'] = pd.to_datetime(loans['loan_time'], errors='coerce')
