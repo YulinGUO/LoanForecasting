@@ -28,14 +28,15 @@ def load_data():
     user_info = pd.read_csv(OUTPUT_PATH + 'user_info.csv')
     for c in user_info.columns:
         user_info[c] = user_info[c].fillna(0)
-    # cummulated data
-    for month in [8, 9, 10, 11, 12]:
-        user_info = cummulate_data_by_month(user_info, month)
 
     for month in [8, 9, 10]:
         lm = LM.format(month)
         lc = LC.format(month)
         user_info[lm] = user_info[lm] - user_info[lc]
+
+    # cummulated data
+    for month in [8, 9, 10, 11, 12]:
+        user_info = cummulate_data_by_month(user_info, month)
 
     user_info = set_actived_month_num(user_info)
     df8 = get_df_by_month(user_info, '8')
