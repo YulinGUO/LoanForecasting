@@ -28,6 +28,7 @@ def load_data():
     user_info = pd.read_csv(OUTPUT_PATH + 'user_info.csv')
     for c in user_info.columns:
         user_info[c] = user_info[c].fillna(0)
+
     for month in [8, 9, 10]:
         lm = LM.format(month)
         lc = LC.format(month)
