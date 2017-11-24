@@ -1,3 +1,9 @@
+*.ipynb
+*.pyc
 *.csv
 .ipynb_checkpoints
 log/
+pys/*.csv
+pys/*.tsv
+pys/train
+pys/test

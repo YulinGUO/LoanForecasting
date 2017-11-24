@@ -18,6 +18,7 @@ basic = ['uid', 'age', 'sex', 'active_date', 'limit']
 ACTIVED_MONTHS = "{}_actived_months"
 ACTIVE_MONTH = "active_month"
 ACTIVE_YEAR = "active_year"
+ACTIVE_DOW = "active_day_of_week"
 TARGET = 'target'
 GPTM = "{}_limit_get_promoted"
 GPE = "{}_limit_get_promoted_ever"
@@ -152,7 +153,7 @@ def get_df_by_month(df, month):
     """Return ."""
     cols = get_column_by_month(df, month)
     basic = ['uid', 'age', 'sex', 'active_date', 'limit']
-    dates_col = [ACTIVE_MONTH, ACTIVE_YEAR]
+    dates_col = [ACTIVE_MONTH, ACTIVE_YEAR, ACTIVE_DOW]
     # this get sum of loans of 8,9,10,11
     cols_12_cum = get_column_by_month(df, '12')
     cols_12_cum.remove('12_loan_amount_cum')
@@ -190,6 +191,7 @@ def set_actived_month_num(user_info):
     user_info['Date'] = pd.to_datetime(user_info['active_date'], errors='coerce')
     user_info[ACTIVE_MONTH] = user_info['Date'].dt.month
     user_info[ACTIVE_YEAR] = user_info['Date'].dt.year - 2015
+    user_info[ACTIVE_DOW] = user_info['Date'].dt.dayofweek
 
     for month in [8, 9, 10, 11]:
         acm = ACTIVED_MONTHS.format(month)

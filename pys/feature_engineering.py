@@ -12,8 +12,9 @@ def add_cate_features(train, submit):
     col_num = 3
     name_basic = 'cate_{}'
     cols_svd_name = map(lambda x: name_basic.format(x), range(0, col_num))
-
-    train = train.join(train_cat[cols_svd_name])
-    submit = submit.join(submit_cat[cols_svd_name])
+    #all_cols = cols_svd_name + ['cat_counts']
+    all_cols = cols_svd_name 
+    train = train.join(train_cat[all_cols])
+    submit = submit.join(submit_cat[all_cols])
     return train, submit
 
