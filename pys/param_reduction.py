@@ -92,7 +92,7 @@ if __name__ == "__main__":
 	print(' load data finished')
 	col_num = 3
 	svd = TruncatedSVD(col_num)
-	name_basic = 'cate_{}'
+	name_basic = 'pid_param_{}'
 	cols_svd_name = map(lambda x: name_basic.format(x), range(0, col_num))
 	new_data = svd.fit_transform(data[get_pid_cols(data)])
 	new_df = pd.DataFrame(new_data, columns=cols_svd_name)
