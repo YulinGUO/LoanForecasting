@@ -17,9 +17,9 @@ def load_data():
     clicks = pd.read_csv(INPUT_PATH + 't_click.csv')
 
     # origin price
-    loans.loan_amount = 5**loans.loan_amount
+    loans.loan_amount = 5**loans.loan_amount - 1
     loans_sum.loan_sum = 5 ** loans_sum.loan_sum - 1
-    orders.price = 5 ** orders.price
+    orders.price = 5 ** orders.price - 1
     orders.discount = 5 ** orders.discount - 1
     users.limit = 5 ** users.limit -1
 

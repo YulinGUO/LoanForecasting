@@ -29,10 +29,10 @@ def load_data():
     for c in user_info.columns:
         user_info[c] = user_info[c].fillna(0)
 
-    for month in [8, 9, 10]:
-        lm = LM.format(month)
-        lc = LC.format(month)
-        user_info[lm] = user_info[lm] - user_info[lc]
+    # for month in [8, 9, 10]:
+    #     lm = LM.format(month)
+    #     lc = LC.format(month)
+    #     user_info[lm] = user_info[lm] - user_info[lc]
     # cummulated data
     for month in [8, 9, 10, 11, 12]:
         user_info = cummulate_data_by_month(user_info, month)
@@ -72,8 +72,8 @@ def load_data():
     df11 = df11.rename(columns=remove_month_rename)
     df11 = add_devs(df11)
 
-    # frames = [df8, df9, df10]
-    frames = [df9, df10]
+    frames = [df8, df9, df10]
+#    frames = [df9, df10]
     result = pd.concat(frames)
     return result, df11
 
