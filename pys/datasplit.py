@@ -44,6 +44,7 @@ def load_data():
     # df8[CC.format(8) + CUM] = df8['comsume_counts_sum'] / 4
     # df8[CM.format(8) + CUM] = df8['comsume_amounts_sum'] / 4
     # df8[CKC.format(8) + CUM] = df8['click_counts_sum'] / 4
+    
     df8[CC.format(8) + CUM] = (user_info[CC.format(8)] + user_info[CC.format(10)] +  user_info[CC.format(11)])/ 3
     df8[CM.format(8) + CUM] = (user_info[CM.format(8)] + user_info[CM.format(10)] + user_info[CM.format(11)]) / 3
     df8[CKC.format(8) + CUM] = (user_info[CKC.format(8)] + user_info[CKC.format(10)] + user_info[CKC.format(11)]) / 3
@@ -72,8 +73,8 @@ def load_data():
     df11 = df11.rename(columns=remove_month_rename)
     df11 = add_devs(df11)
 
-    # frames = [df8, df9, df10]
-    frames = [df9, df10]
+    frames = [df8, df9, df10]
+    # frames = [df9, df10]
     result = pd.concat(frames)
     return result, df11
 

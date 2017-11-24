@@ -76,8 +76,8 @@ def split_cate(df):
 	cate9 = df.iloc[len(res)*1/4:len(res)*1/2]
 	cate10 = df.iloc[len(res)*1/2:len(res)*3/4]
 	cate11 = df.iloc[len(res)*3/4:len(res)]
-	#cate_frames = [cate8, cate9, cate10]
-	cate_frames = [cate9, cate10]
+	cate_frames = [cate8, cate9, cate10]
+	# cate_frames = [cate9, cate10]
 	train = pd.concat(cate_frames)
 	return train, cate11
 
@@ -85,12 +85,15 @@ if __name__ == "__main__":
 	print('begin to load data')
 	data = load_data()
 	print(' load data finished')
-	svd = TruncatedSVD(3)
+	col_num = 3
+	svd = TruncatedSVD(col_num)
+	name_basic = 'cate_{}'
+	cols_svd_name = map(lambda x: name_basic.format(x), range(0, col_num))
 	new_data = svd.fit_transform(data[get_cate_cols(data)])
-	new_df = pd.DataFrame(new_data)
+	new_df = pd.DataFrame(new_data, columns=cols_svd_name)
 
 	res = data.join(new_df)
-	cols = ["uid", "transaction_month", 0, 1, 2]
+	cols = ["uid", "transaction_month"] + cols_svd_name
 	res = res[cols]
 	train, submit = split_cate(res)
 	print('to csv ........')
