@@ -18,3 +18,14 @@ def add_cate_features(train, submit):
     submit = submit.join(submit_cat[all_cols])
     return train, submit
 
+def add_param_features(train, submit):
+    train_param = pd.read_csv(INPUT_PATH + "train_param.csv")
+    submit_param = pd.read_csv(INPUT_PATH + "submit_param.csv")
+    col_num = 3
+    name_basic = 'pid_param_{}'
+    cols_svd_name = map(lambda x: name_basic.format(x), range(0, col_num))
+
+    train = train.join(train_param[cols_svd_name])
+    submit = submit.join(submit_param[cols_svd_name])
+    return train, submit
+
