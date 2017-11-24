@@ -12,32 +12,37 @@ def load_data():
 	clicks['Date'] = pd.to_datetime(clicks['click_time'], errors='coerce')
 	clicks['transaction_month'] = clicks['Date'].dt.month
 	clicks["p_count"] = 1
-	clicks = clicks.groupby(by=["uid", "transaction_month", "param"], as_index=False)["p_count"].sum()
-	clicks_new = clicks.pivot_table(['p_count'], ['uid'], ['transaction_month', "param"], fill_value=0)
+	clicks = clicks.groupby(by=["uid", "transaction_month", "pid", "param"], as_index=False)["p_count"].sum()
+	clicks_new = clicks.pivot_table(['p_count'], ['uid'], ['transaction_month', "pid", "param"], fill_value=0)
 	clicks_new.reset_index(drop=False, inplace=True)
-	clicks_new.columns = ['{}_param_{}'.format(i[1], i[2]) for i in clicks_new.columns]
-	clicks_new = clicks_new.rename(index=str, columns={"_param_": "uid"})
+	clicks_new.columns = ['{}_pid_{}_param_{}'.format(i[1], i[2], i[3]) for i in clicks_new.columns]
+	clicks_new = clicks_new.rename(index=str, columns={"_pid__param_": "uid"})
 
 	param_list = clicks.param.map(lambda x:"param_"+str(x)).unique()
+	pid_list = clicks.pid.map(lambda x:"pid_"+str(x)).unique()
+	pid_param_list = []
+	for pid in pid_list:
+	    for param in param_list:
+	        pid_param_list.append(pid+"_"+param)
 
 	df8 = get_df_by_month(clicks_new, '8')
 	df8 = df8.rename(columns=ds.remove_month_rename)
-	df8 = add_default_param(df8, param_list)
+	df8 = add_default_param(df8, pid_param_list)
 	df8 = users_merge(users, df8, 8)
 
 	df9 = get_df_by_month(clicks_new, '9')
 	df9 = df9.rename(columns=ds.remove_month_rename)
-	df9 = add_default_param(df9, param_list)
+	df9 = add_default_param(df9, pid_param_list)
 	df9 = users_merge(users, df9, 9)
 
 	df10 = get_df_by_month(clicks_new, '10')
 	df10 = df10.rename(columns=ds.remove_month_rename)
-	df10 = add_default_param(df10, param_list)
+	df10 = add_default_param(df10, pid_param_list)
 	df10 = users_merge(users, df10, 10)
 
 	df11 = get_df_by_month(clicks_new, '11')
 	df11 = df11.rename(columns=ds.remove_month_rename)
-	df11 = add_default_param(df11, param_list)
+	df11 = add_default_param(df11, pid_param_list)
 	df11 = users_merge(users, df11, 11)
 
 	frames = [df8, df9, df10, df11]
@@ -49,8 +54,8 @@ def load_data():
 
 	return data
 	
-def get_param_cols(df):
-    return df.columns[df.columns.str.startswith("param")]
+def get_pid_cols(df):
+    return df.columns[df.columns.str.startswith("pid")]
 
 def get_df_by_month(df, month):
     """Return ."""
@@ -86,7 +91,7 @@ if __name__ == "__main__":
 	data = load_data()
 	print(' load data finished')
 	svd = TruncatedSVD(3)
-	new_data = svd.fit_transform(data[get_param_cols(data)])
+	new_data = svd.fit_transform(data[get_pid_cols(data)])
 	new_df = pd.DataFrame(new_data)
 
 	res = data.join(new_df)
