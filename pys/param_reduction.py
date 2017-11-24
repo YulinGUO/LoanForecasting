@@ -90,12 +90,15 @@ if __name__ == "__main__":
 	print('begin to load data')
 	data = load_data()
 	print(' load data finished')
-	svd = TruncatedSVD(3)
+	col_num = 3
+	svd = TruncatedSVD(col_num)
+	name_basic = 'cate_{}'
+	cols_svd_name = map(lambda x: name_basic.format(x), range(0, col_num))
 	new_data = svd.fit_transform(data[get_pid_cols(data)])
-	new_df = pd.DataFrame(new_data)
+	new_df = pd.DataFrame(new_data, columns=cols_svd_name)
 
 	res = data.join(new_df)
-	cols = ["uid", "transaction_month", 0, 1, 2]
+	cols = ["uid", "transaction_month"] + cols_svd_name
 	res = res[cols]
 	train, submit = split_param(res)
 	print('to csv ........')
