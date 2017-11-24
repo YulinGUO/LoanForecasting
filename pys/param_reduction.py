@@ -76,7 +76,8 @@ def split_param(df):
 	param9 = df.iloc[len(res)*1/4:len(res)*1/2]
 	param10 = df.iloc[len(res)*1/2:len(res)*3/4]
 	param11 = df.iloc[len(res)*3/4:len(res)]
-	param_frames = [param9, param10]
+	param_frames = [param8, param9, param10]
+	#param_frames = [param9, param10]
 	train = pd.concat(param_frames)
 	return train, param11
 

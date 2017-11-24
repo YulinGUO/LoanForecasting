@@ -77,7 +77,6 @@ def split_cate(df):
 	cate10 = df.iloc[len(res)*1/2:len(res)*3/4]
 	cate11 = df.iloc[len(res)*3/4:len(res)]
 	cate_frames = [cate8, cate9, cate10]
-	# cate_frames = [cate9, cate10]
 	train = pd.concat(cate_frames)
 	return train, cate11
 
