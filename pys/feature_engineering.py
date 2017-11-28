@@ -29,3 +29,16 @@ def add_param_features(train, submit):
     submit = submit.join(submit_param[cols_svd_name])
     return train, submit
 
+def add_dow_features(train, submit):
+    train_param = pd.read_csv(INPUT_PATH + "train_day_of_week.csv")
+    submit_param = pd.read_csv(INPUT_PATH + "submit_day_of_week.csv")
+    col_num = 3
+    name_basic = 'dow_{}'
+    cols_svd_name = map(lambda x: name_basic.format(x), range(0, col_num))
+
+    cols_extra_name = ["workdays", "weekends"]
+
+    train = train.join(train_param[cols_svd_name + cols_extra_name])
+    submit = submit.join(submit_param[cols_svd_name + cols_extra_name])
+    return train, submit
+
