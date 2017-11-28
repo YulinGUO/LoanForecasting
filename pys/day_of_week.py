@@ -30,6 +30,7 @@ def load_data():
     df8 = df8.rename(columns=ds.remove_month_rename)
     df8 = add_default_col(df8, col_list)
     df8 = users_merge(users, df8, 8)
+    ###weekends mean sunday&monday
     df8["workdays"] = 22
     df8["weekends"] = 8
     
@@ -51,8 +52,8 @@ def load_data():
     df11 = df11.rename(columns=ds.remove_month_rename)
     df11 = add_default_col(df11, col_list)
     df11 = users_merge(users, df11, 11)
-    df11["workdays"] = 22
-    df11["weekends"] = 9
+    df11["workdays"] = 23
+    df11["weekends"] = 8
     
     frames = [df8, df9, df10, df11]
     data = pd.concat(frames)
