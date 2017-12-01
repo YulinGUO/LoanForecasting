@@ -11,9 +11,9 @@ def load_data():
     orders = pd.read_csv(INPUT_PATH + 't_order.csv')
     orders['Date'] = pd.to_datetime(orders['buy_time'], errors='coerce')
     orders['transaction_month'] = orders['Date'].dt.month
-    orders["click_count"] = 1
-    orders = orders.groupby(by=["uid", "transaction_month", "cate_id"], as_index=False)["click_count"].sum()
-    orders_new = orders.pivot_table(['click_count'], ['uid'], ['transaction_month', "cate_id"], fill_value=0)
+    #orders["click_count"] = 1
+    orders = orders.groupby(by=["uid", "transaction_month", "cate_id"], as_index=False)["qty"].sum()
+    orders_new = orders.pivot_table(['qty'], ['uid'], ['transaction_month', "cate_id"], fill_value=0)
     orders_new.reset_index(drop=False, inplace=True)
     orders_new.columns = ['{}_cate_id_{}'.format(i[1], i[2]) for i in orders_new.columns]
     orders_new = orders_new.rename(index=str, columns={"_cate_id_": "uid"})
