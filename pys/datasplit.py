@@ -28,6 +28,9 @@ GPE = "{}_limit_get_promoted_ever"
 def load_data():
     """Return ."""
     user_info = pd.read_csv(OUTPUT_PATH + 'user_info.csv')
+    lap = pd.read_csv(OUTPUT_PATH +"loan_pay_next.csv")
+    #add loan amount pay next month
+    user_info = user_info.merge(lap,how='left', on="uid")
     for c in user_info.columns:
         user_info[c] = user_info[c].fillna(0)
 
@@ -230,7 +233,7 @@ def add_devs(df):
     # arr = ['consume_amount_cum', 'loan_amount_cum', 'loan_amount', 'click_count_cum', 'click_counts_sum',
     # 'click_count','comsume_amounts_sum']
     arr = ['consume_amount_cum', 'loan_amount_cum', 'loan_amount', 'click_count_cum', 'click_count', 
-    'limit','actived_months']
+    'limit','actived_months','lmp_reste','lmp_pay']
     df['cat_age_sex'] = df[['age', 'sex']].astype(str).apply(lambda x: '_'.join(x), axis=1)
     AVG_ITEM = 'avg_{}'
     DEV_ITEM = 'dev_{}'
@@ -279,7 +282,7 @@ def add_devs_another(df):
     # arr = ['consume_amount_cum', 'loan_amount_cum', 'loan_amount', 'click_count_cum', 'click_counts_sum',
     # 'click_count','comsume_amounts_sum']
     arr = ['consume_amount_cum', 'loan_amount_cum', 'loan_amount', 'click_count_cum', 'click_count', 
-    'limit','actived_months']
+    'limit','actived_months','lmp_reste','lmp_pay']
     df['cat_age_sex'] = df[['sex', 'limit']].astype(str).apply(lambda x: '_'.join(x), axis=1)
     AVG_ITEM = 'avg_sl_{}'
     DEV_ITEM = 'dev_sl_{}'
@@ -328,7 +331,7 @@ def add_devs_third(df):
     # arr = ['consume_amount_cum', 'loan_amount_cum', 'loan_amount', 'click_count_cum', 'click_counts_sum',
     # 'click_count','comsume_amounts_sum']
     arr = ['consume_amount_cum', 'loan_amount_cum', 'loan_amount', 'click_count_cum', 'click_count', 
-    'limit','actived_months']
+    'limit','actived_months','lmp_reste','lmp_pay']
     df['cat_age_sex'] = df[['age', 'limit']].astype(str).apply(lambda x: '_'.join(x), axis=1)
     AVG_ITEM = 'avg_al_{}'
     DEV_ITEM = 'dev_al_{}'
@@ -377,7 +380,7 @@ def add_devs_with3cat(df):
     # arr = ['consume_amount_cum', 'loan_amount_cum', 'loan_amount', 'click_count_cum', 'click_counts_sum',
     # 'click_count','comsume_amounts_sum']
     arr = ['consume_amount_cum', 'loan_amount_cum', 'loan_amount', 'click_count_cum', 'click_count', 
-    'limit','actived_months']
+    'limit','actived_months','lmp_reste','lmp_pay']
     df['cat_age_sex'] = df[['age', 'sex', 'limit']].astype(str).apply(lambda x: '_'.join(x), axis=1)
     AVG_ITEM = 'avg_three_{}'
     DEV_ITEM = 'dev_three_{}'
@@ -426,7 +429,7 @@ def add_devs_sex(df):
     # arr = ['consume_amount_cum', 'loan_amount_cum', 'loan_amount', 'click_count_cum', 'click_counts_sum',
     # 'click_count','comsume_amounts_sum']
     arr = ['consume_amount_cum', 'loan_amount_cum', 'loan_amount', 'click_count_cum', 'click_count', 
-    'limit','actived_months']
+    'limit','actived_months','lmp_reste','lmp_pay']
     df['cat_age_sex'] = df[['limit']].astype(str).apply(lambda x: '_'.join(x), axis=1)
     AVG_ITEM = 'avg_sex_{}'
     DEV_ITEM = 'dev_sex_{}'
@@ -475,7 +478,7 @@ def add_devs_date(df):
     # arr = ['consume_amount_cum', 'loan_amount_cum', 'loan_amount', 'click_count_cum', 'click_counts_sum',
     # 'click_count','comsume_amounts_sum']
     arr = ['consume_amount_cum', 'loan_amount_cum', 'loan_amount', 'click_count_cum', 'click_count', 
-    'limit','actived_months']
+    'limit','actived_months','lmp_reste','lmp_pay']
     df['cat_age_sex'] = df[['active_year', 'active_month']].astype(str).apply(lambda x: '_'.join(x), axis=1)
     AVG_ITEM = 'avg_date_{}'
     DEV_ITEM = 'dev_date_{}'
