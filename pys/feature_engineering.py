@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import pandas as pd
 
+import datasplit as ds
 
 INPUT_PATH = '../input/'
 OUTPUT_PATH = '../output/'
@@ -41,4 +42,38 @@ def add_dow_features(train, submit):
     train = train.join(train_param[cols_svd_name + cols_extra_name])
     submit = submit.join(submit_param[cols_svd_name + cols_extra_name])
     return train, submit
+
+cat_features = ['age','sex','active_month', 'active_year', 'active_day_of_week', 'limit_get_promoted','limit_get_promoted_ever']
+
+num_features_row = ['limit', 'comsume_count', 'consume_amount', 'loan_amount', 'loan_count','plannum','click_count', 'actived_months']
+
+
+ # num_features_all = ['limit', 'comsume_count', 'consume_amount', 'loan_amount', 'loan_count','plannum','click_count',
+ # 'comsume_count_cum', 'consume_amount_cum', 'loan_amount_cum', 'loan_count_cum', 'click_count_cum',
+ # 'plannum_cum', 'actived_months', 'avg_consume_amount_cum', 'median_consume_amount_cum',
+ # 'dev_consume_amount_cum',
+ # 'dev_median_consume_amount_cum',
+ # 'avg_loan_amount_cum',
+ # 'dev_loan_amount_cum',
+ # 'avg_loan_amount',
+ # 'dev_loan_amount',
+ # 'avg_click_count_cum',
+ # 'median_click_count_cum',
+ # 'dev_click_count_cum',
+ # 'dev_median_click_count_cum',
+ # 'avg_click_count',
+ # 'median_click_count',
+ # 'dev_click_count',
+ # 'dev_median_click_count',
+ # 'cate_0',
+ # 'cate_1',
+ # 'cate_2',
+ # 'pid_param_0',
+ # 'pid_param_1',
+ # 'pid_param_2',
+ # 'dow_0',
+ # 'dow_1',
+ # 'dow_2',
+ # 'workdays',
+ # 'weekends']
 

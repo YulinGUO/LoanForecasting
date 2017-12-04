@@ -4,6 +4,7 @@ import re
 
 import pandas as pd
 
+import numpy as np
 
 INPUT_PATH = '../input/'
 OUTPUT_PATH = '../output/'
@@ -52,27 +53,38 @@ def load_data():
     df8[LM.format(8) + CUM] = (user_info[LM.format(8)] + user_info[LM.format(10)] +  user_info[LM.format(11)])/ 3
     df8[LC.format(8) + CUM] = (user_info[LC.format(8)] + user_info[LC.format(10)] + user_info[LC.format(11)]) / 3
     df8[PM.format(8) + CUM] = (user_info[PM.format(8)] + user_info[PM.format(10)] + user_info[PM.format(11)]) / 3
-
     df8 = add_target_by_month(df8, 8, user_info)
     df8 = df8.rename(columns=remove_month_rename)
     df8 = add_devs(df8)
+    df8 = add_devs_with3cat(df8)
+    df8 = add_devs_another(df8)
+    df8 = add_devs_date(df8)
 
     df9 = get_df_by_month(user_info, '9')
     df9 = rename_12_sum(df9)
     df9 = add_target_by_month(df9, 9, user_info)
     df9 = df9.rename(columns=remove_month_rename)
     df9 = add_devs(df9)
+    df9 = add_devs_with3cat(df9)
+    df9 = add_devs_another(df9)
+    df9 = add_devs_date(df9)
 
     df10 = get_df_by_month(user_info, '10')
     df10 = rename_12_sum(df10)
     df10 = add_target_by_month(df10, 10, user_info)
     df10 = df10.rename(columns=remove_month_rename)
     df10 = add_devs(df10)
+    df10 = add_devs_with3cat(df10)
+    df10 = add_devs_another(df10)
+    df10 = add_devs_date(df10)
 
     df11 = get_df_by_month(user_info, '11')
     df11 = rename_12_sum(df11)
     df11 = df11.rename(columns=remove_month_rename)
     df11 = add_devs(df11)
+    df11 = add_devs_with3cat(df11)
+    df11 = add_devs_another(df11)
+    df11 = add_devs_date(df11)
 
     frames = [df8, df9, df10]
     # frames = [df9, df10]
@@ -217,29 +229,291 @@ def add_devs(df):
     # got worse : plannum,loan_count
     # arr = ['consume_amount_cum', 'loan_amount_cum', 'loan_amount', 'click_count_cum', 'click_counts_sum',
     # 'click_count','comsume_amounts_sum']
-    arr = ['consume_amount_cum', 'loan_amount_cum', 'loan_amount', 'click_count_cum', 'click_count']
+    arr = ['consume_amount_cum', 'loan_amount_cum', 'loan_amount', 'click_count_cum', 'click_count', 
+    'limit','actived_months']
     df['cat_age_sex'] = df[['age', 'sex']].astype(str).apply(lambda x: '_'.join(x), axis=1)
     AVG_ITEM = 'avg_{}'
     DEV_ITEM = 'dev_{}'
     MEDIAN_ITEM = 'median_{}'
     DMEDIAN_ITEM = 'dev_median_{}'
     MODE_ITEM = 'mode_{}'
+    MAX_ITEM = 'max_{}'
+    MIN_ITEM = 'min_{}'
+    DMAX_ITEM = 'dev_max_{}'
+    DMIN_ITEM = 'dev_min_{}'
     for item in arr:
         this_dic = df.groupby(by=['cat_age_sex'], as_index=True)[item].aggregate('mean').to_dict()
         median_dic = df.groupby(by=['cat_age_sex'], as_index=True)[item].aggregate('median').to_dict()
+        max_dic = df.groupby(by=['cat_age_sex'], as_index=True)[item].aggregate('max').to_dict()
+        min_dic = df.groupby(by=['cat_age_sex'], as_index=True)[item].aggregate('min').to_dict()
         # mode_dic = df.groupby(by=['cat_age_sex'], as_index=True)[item].apply(lambda x: x.mode()[0]).to_dict()
         avg_item = AVG_ITEM.format(item)
         dev_item = DEV_ITEM.format(item)
         d_median_item = DMEDIAN_ITEM.format(item)
         median_item = MEDIAN_ITEM.format(item)
+        max_item = MAX_ITEM.format(item)
+        d_max_item = DMAX_ITEM.format(item)
+        min_item = MIN_ITEM.format(item)
+        d_min_item = DMIN_ITEM.format(item)
         # mode_item = MODE_ITEM.format(item)
         df[avg_item] = df['cat_age_sex'].map(this_dic)
         df[median_item] = df['cat_age_sex'].map(median_dic)
+        # df[max_item] = df['cat_age_sex'].map(max_dic)
+        # df[min_item] = df['cat_age_sex'].map(min_dic)
         # df[mode_item] = df['cat_age_sex'].map(mode_dic)
         # df[dev_item] = (df[item] - df[avg_item])
         df[dev_item] = (df[item] - df[avg_item]) / df[avg_item]
         df[d_median_item] = 0
         df.loc[df[median_item] <> 0,d_median_item] = (df[item] - df[median_item]) / df[median_item]
+
+        # df[d_max_item] = (df[item] - df[max_item]) / df[max_item]
+        # df[d_min_item] = 0
+        # df.loc[df[min_item]<> 0, d_min_item] = (df[item] - df[min_item]) / df[min_item]
+        # df = df.drop([avg_item], axis=1)
+    return df.drop(['cat_age_sex'], axis=1)
+
+def add_devs_another(df):
+    """Return ."""
+    # arr = ['comsume_count', 'consume_amount', 'loan_amount', 'loan_count', 'plannum', 'click_count']
+    # got worse : plannum,loan_count
+    # arr = ['consume_amount_cum', 'loan_amount_cum', 'loan_amount', 'click_count_cum', 'click_counts_sum',
+    # 'click_count','comsume_amounts_sum']
+    arr = ['consume_amount_cum', 'loan_amount_cum', 'loan_amount', 'click_count_cum', 'click_count', 
+    'limit','actived_months']
+    df['cat_age_sex'] = df[['sex', 'limit']].astype(str).apply(lambda x: '_'.join(x), axis=1)
+    AVG_ITEM = 'avg_sl_{}'
+    DEV_ITEM = 'dev_sl_{}'
+    MEDIAN_ITEM = 'median_sl_{}'
+    DMEDIAN_ITEM = 'dev_sl_median_{}'
+    MODE_ITEM = 'mode_sl_{}'
+    MAX_ITEM = 'max_sl_{}'
+    MIN_ITEM = 'min_sl_{}'
+    DMAX_ITEM = 'dev_max_sl_{}'
+    DMIN_ITEM = 'dev_min_sl_{}'
+    for item in arr:
+        this_dic = df.groupby(by=['cat_age_sex'], as_index=True)[item].aggregate('mean').to_dict()
+        median_dic = df.groupby(by=['cat_age_sex'], as_index=True)[item].aggregate('median').to_dict()
+        max_dic = df.groupby(by=['cat_age_sex'], as_index=True)[item].aggregate('max').to_dict()
+        min_dic = df.groupby(by=['cat_age_sex'], as_index=True)[item].aggregate('min').to_dict()
+        # mode_dic = df.groupby(by=['cat_age_sex'], as_index=True)[item].apply(lambda x: x.mode()[0]).to_dict()
+        avg_item = AVG_ITEM.format(item)
+        dev_item = DEV_ITEM.format(item)
+        d_median_item = DMEDIAN_ITEM.format(item)
+        median_item = MEDIAN_ITEM.format(item)
+        max_item = MAX_ITEM.format(item)
+        d_max_item = DMAX_ITEM.format(item)
+        min_item = MIN_ITEM.format(item)
+        d_min_item = DMIN_ITEM.format(item)
+        # mode_item = MODE_ITEM.format(item)
+        df[avg_item] = df['cat_age_sex'].map(this_dic)
+        df[median_item] = df['cat_age_sex'].map(median_dic)
+        # df[max_item] = df['cat_age_sex'].map(max_dic)
+        # df[min_item] = df['cat_age_sex'].map(min_dic)
+        # df[mode_item] = df['cat_age_sex'].map(mode_dic)
+        # df[dev_item] = (df[item] - df[avg_item])
+        df[dev_item] = (df[item] - df[avg_item]) / df[avg_item]
+        df[d_median_item] = 0
+        df.loc[df[median_item] <> 0,d_median_item] = (df[item] - df[median_item]) / df[median_item]
+
+        # df[d_max_item] = (df[item] - df[max_item]) / df[max_item]
+        # df[d_min_item] = 0
+        # df.loc[df[min_item]<> 0, d_min_item] = (df[item] - df[min_item]) / df[min_item]
+        # df = df.drop([avg_item], axis=1)
+    return df.drop(['cat_age_sex'], axis=1)
+
+def add_devs_third(df):
+    """Return ."""
+    # arr = ['comsume_count', 'consume_amount', 'loan_amount', 'loan_count', 'plannum', 'click_count']
+    # got worse : plannum,loan_count
+    # arr = ['consume_amount_cum', 'loan_amount_cum', 'loan_amount', 'click_count_cum', 'click_counts_sum',
+    # 'click_count','comsume_amounts_sum']
+    arr = ['consume_amount_cum', 'loan_amount_cum', 'loan_amount', 'click_count_cum', 'click_count', 
+    'limit','actived_months']
+    df['cat_age_sex'] = df[['age', 'limit']].astype(str).apply(lambda x: '_'.join(x), axis=1)
+    AVG_ITEM = 'avg_al_{}'
+    DEV_ITEM = 'dev_al_{}'
+    MEDIAN_ITEM = 'median_al_{}'
+    DMEDIAN_ITEM = 'dev_al_median_{}'
+    MODE_ITEM = 'mode_al_{}'
+    MAX_ITEM = 'max_al_{}'
+    MIN_ITEM = 'min_al_{}'
+    DMAX_ITEM = 'dev_max_al_{}'
+    DMIN_ITEM = 'dev_min_al_{}'
+    for item in arr:
+        this_dic = df.groupby(by=['cat_age_sex'], as_index=True)[item].aggregate('mean').to_dict()
+        median_dic = df.groupby(by=['cat_age_sex'], as_index=True)[item].aggregate('median').to_dict()
+        max_dic = df.groupby(by=['cat_age_sex'], as_index=True)[item].aggregate('max').to_dict()
+        min_dic = df.groupby(by=['cat_age_sex'], as_index=True)[item].aggregate('min').to_dict()
+        # mode_dic = df.groupby(by=['cat_age_sex'], as_index=True)[item].apply(lambda x: x.mode()[0]).to_dict()
+        avg_item = AVG_ITEM.format(item)
+        dev_item = DEV_ITEM.format(item)
+        d_median_item = DMEDIAN_ITEM.format(item)
+        median_item = MEDIAN_ITEM.format(item)
+        max_item = MAX_ITEM.format(item)
+        d_max_item = DMAX_ITEM.format(item)
+        min_item = MIN_ITEM.format(item)
+        d_min_item = DMIN_ITEM.format(item)
+        # mode_item = MODE_ITEM.format(item)
+        df[avg_item] = df['cat_age_sex'].map(this_dic)
+        df[median_item] = df['cat_age_sex'].map(median_dic)
+        # df[max_item] = df['cat_age_sex'].map(max_dic)
+        # df[min_item] = df['cat_age_sex'].map(min_dic)
+        # df[mode_item] = df['cat_age_sex'].map(mode_dic)
+        # df[dev_item] = (df[item] - df[avg_item])
+        df[dev_item] = (df[item] - df[avg_item]) / df[avg_item]
+        df[d_median_item] = 0
+        df.loc[df[median_item] <> 0,d_median_item] = (df[item] - df[median_item]) / df[median_item]
+
+        # df[d_max_item] = (df[item] - df[max_item]) / df[max_item]
+        # df[d_min_item] = 0
+        # df.loc[df[min_item]<> 0, d_min_item] = (df[item] - df[min_item]) / df[min_item]
+        # df = df.drop([avg_item], axis=1)
+    return df.drop(['cat_age_sex'], axis=1)
+
+def add_devs_with3cat(df):
+    """Return ."""
+    # arr = ['comsume_count', 'consume_amount', 'loan_amount', 'loan_count', 'plannum', 'click_count']
+    # got worse : plannum,loan_count
+    # arr = ['consume_amount_cum', 'loan_amount_cum', 'loan_amount', 'click_count_cum', 'click_counts_sum',
+    # 'click_count','comsume_amounts_sum']
+    arr = ['consume_amount_cum', 'loan_amount_cum', 'loan_amount', 'click_count_cum', 'click_count', 
+    'limit','actived_months']
+    df['cat_age_sex'] = df[['age', 'sex', 'limit']].astype(str).apply(lambda x: '_'.join(x), axis=1)
+    AVG_ITEM = 'avg_three_{}'
+    DEV_ITEM = 'dev_three_{}'
+    MEDIAN_ITEM = 'median_three_{}'
+    DMEDIAN_ITEM = 'dev_three_median_{}'
+    MODE_ITEM = 'mode_three_{}'
+    MAX_ITEM = 'max_three_{}'
+    MIN_ITEM = 'min_three_{}'
+    DMAX_ITEM = 'dev_three_max_{}'
+    DMIN_ITEM = 'dev_three_min_{}'
+    for item in arr:
+        this_dic = df.groupby(by=['cat_age_sex'], as_index=True)[item].aggregate('mean').to_dict()
+        median_dic = df.groupby(by=['cat_age_sex'], as_index=True)[item].aggregate('median').to_dict()
+        max_dic = df.groupby(by=['cat_age_sex'], as_index=True)[item].aggregate('max').to_dict()
+        min_dic = df.groupby(by=['cat_age_sex'], as_index=True)[item].aggregate('min').to_dict()
+        # mode_dic = df.groupby(by=['cat_age_sex'], as_index=True)[item].apply(lambda x: x.mode()[0]).to_dict()
+        avg_item = AVG_ITEM.format(item)
+        dev_item = DEV_ITEM.format(item)
+        d_median_item = DMEDIAN_ITEM.format(item)
+        median_item = MEDIAN_ITEM.format(item)
+        max_item = MAX_ITEM.format(item)
+        d_max_item = DMAX_ITEM.format(item)
+        min_item = MIN_ITEM.format(item)
+        d_min_item = DMIN_ITEM.format(item)
+        # mode_item = MODE_ITEM.format(item)
+        df[avg_item] = df['cat_age_sex'].map(this_dic)
+        df[median_item] = df['cat_age_sex'].map(median_dic)
+        # df[max_item] = df['cat_age_sex'].map(max_dic)
+        # df[min_item] = df['cat_age_sex'].map(min_dic)
+        # df[mode_item] = df['cat_age_sex'].map(mode_dic)
+        # df[dev_item] = (df[item] - df[avg_item])
+        df[dev_item] = (df[item] - df[avg_item]) / df[avg_item]
+        df[d_median_item] = 0
+        df.loc[df[median_item] <> 0,d_median_item] = (df[item] - df[median_item]) / df[median_item]
+
+        # df[d_max_item] = (df[item] - df[max_item]) / df[max_item]
+        # df[d_min_item] = 0
+        # df.loc[df[min_item]<> 0, d_min_item] = (df[item] - df[min_item]) / df[min_item]
+        # df = df.drop([avg_item], axis=1)
+    return df.drop(['cat_age_sex'], axis=1)
+
+def add_devs_sex(df):
+    """Return ."""
+    # arr = ['comsume_count', 'consume_amount', 'loan_amount', 'loan_count', 'plannum', 'click_count']
+    # got worse : plannum,loan_count
+    # arr = ['consume_amount_cum', 'loan_amount_cum', 'loan_amount', 'click_count_cum', 'click_counts_sum',
+    # 'click_count','comsume_amounts_sum']
+    arr = ['consume_amount_cum', 'loan_amount_cum', 'loan_amount', 'click_count_cum', 'click_count', 
+    'limit','actived_months']
+    df['cat_age_sex'] = df[['limit']].astype(str).apply(lambda x: '_'.join(x), axis=1)
+    AVG_ITEM = 'avg_sex_{}'
+    DEV_ITEM = 'dev_sex_{}'
+    MEDIAN_ITEM = 'median_sex_{}'
+    DMEDIAN_ITEM = 'dev_sex_median_{}'
+    MODE_ITEM = 'mode_sex_{}'
+    MAX_ITEM = 'max_sex_{}'
+    MIN_ITEM = 'min_sex_{}'
+    DMAX_ITEM = 'dev_max_sex_{}'
+    DMIN_ITEM = 'dev_min_sex_{}'
+    for item in arr:
+        this_dic = df.groupby(by=['cat_age_sex'], as_index=True)[item].aggregate('mean').to_dict()
+        median_dic = df.groupby(by=['cat_age_sex'], as_index=True)[item].aggregate('median').to_dict()
+        max_dic = df.groupby(by=['cat_age_sex'], as_index=True)[item].aggregate('max').to_dict()
+        min_dic = df.groupby(by=['cat_age_sex'], as_index=True)[item].aggregate('min').to_dict()
+        # mode_dic = df.groupby(by=['cat_age_sex'], as_index=True)[item].apply(lambda x: x.mode()[0]).to_dict()
+        avg_item = AVG_ITEM.format(item)
+        dev_item = DEV_ITEM.format(item)
+        d_median_item = DMEDIAN_ITEM.format(item)
+        median_item = MEDIAN_ITEM.format(item)
+        max_item = MAX_ITEM.format(item)
+        d_max_item = DMAX_ITEM.format(item)
+        min_item = MIN_ITEM.format(item)
+        d_min_item = DMIN_ITEM.format(item)
+        # mode_item = MODE_ITEM.format(item)
+        df[avg_item] = df['cat_age_sex'].map(this_dic)
+        df[median_item] = df['cat_age_sex'].map(median_dic)
+        # df[max_item] = df['cat_age_sex'].map(max_dic)
+        # df[min_item] = df['cat_age_sex'].map(min_dic)
+        # df[mode_item] = df['cat_age_sex'].map(mode_dic)
+        # df[dev_item] = (df[item] - df[avg_item])
+        df[dev_item] = (df[item] - df[avg_item]) / df[avg_item]
+        df[d_median_item] = 0
+        df.loc[df[median_item] <> 0,d_median_item] = (df[item] - df[median_item]) / df[median_item]
+
+        # df[d_max_item] = (df[item] - df[max_item]) / df[max_item]
+        # df[d_min_item] = 0
+        # df.loc[df[min_item]<> 0, d_min_item] = (df[item] - df[min_item]) / df[min_item]
+        # df = df.drop([avg_item], axis=1)
+    return df.drop(['cat_age_sex'], axis=1)
+
+def add_devs_date(df):
+    """Return ."""
+    # arr = ['comsume_count', 'consume_amount', 'loan_amount', 'loan_count', 'plannum', 'click_count']
+    # got worse : plannum,loan_count
+    # arr = ['consume_amount_cum', 'loan_amount_cum', 'loan_amount', 'click_count_cum', 'click_counts_sum',
+    # 'click_count','comsume_amounts_sum']
+    arr = ['consume_amount_cum', 'loan_amount_cum', 'loan_amount', 'click_count_cum', 'click_count', 
+    'limit','actived_months']
+    df['cat_age_sex'] = df[['active_year', 'active_month']].astype(str).apply(lambda x: '_'.join(x), axis=1)
+    AVG_ITEM = 'avg_date_{}'
+    DEV_ITEM = 'dev_date_{}'
+    MEDIAN_ITEM = 'median_date_{}'
+    DMEDIAN_ITEM = 'dev_date_median_{}'
+    MODE_ITEM = 'mode_date_{}'
+    MAX_ITEM = 'max_date_{}'
+    MIN_ITEM = 'min_date_{}'
+    DMAX_ITEM = 'dev_date_max_{}'
+    DMIN_ITEM = 'dev_date_min_{}'
+    for item in arr:
+        this_dic = df.groupby(by=['cat_age_sex'], as_index=True)[item].aggregate('mean').to_dict()
+        median_dic = df.groupby(by=['cat_age_sex'], as_index=True)[item].aggregate('median').to_dict()
+        max_dic = df.groupby(by=['cat_age_sex'], as_index=True)[item].aggregate('max').to_dict()
+        min_dic = df.groupby(by=['cat_age_sex'], as_index=True)[item].aggregate('min').to_dict()
+        # mode_dic = df.groupby(by=['cat_age_sex'], as_index=True)[item].apply(lambda x: x.mode()[0]).to_dict()
+        avg_item = AVG_ITEM.format(item)
+        dev_item = DEV_ITEM.format(item)
+        d_median_item = DMEDIAN_ITEM.format(item)
+        median_item = MEDIAN_ITEM.format(item)
+        max_item = MAX_ITEM.format(item)
+        d_max_item = DMAX_ITEM.format(item)
+        min_item = MIN_ITEM.format(item)
+        d_min_item = DMIN_ITEM.format(item)
+        # mode_item = MODE_ITEM.format(item)
+        df[avg_item] = df['cat_age_sex'].map(this_dic)
+        df[median_item] = df['cat_age_sex'].map(median_dic)
+        # df[max_item] = df['cat_age_sex'].map(max_dic)
+        # df[min_item] = df['cat_age_sex'].map(min_dic)
+        # df[mode_item] = df['cat_age_sex'].map(mode_dic)
+        # df[dev_item] = (df[item] - df[avg_item])
+        df[dev_item] = (df[item] - df[avg_item]) / df[avg_item]
+        df[d_median_item] = 0
+        df.loc[df[median_item] <> 0,d_median_item] = (df[item] - df[median_item]) / df[median_item]
+
+        # df[d_max_item] = (df[item] - df[max_item]) / df[max_item]
+        # df[d_min_item] = 0
+        # df.loc[df[min_item]<> 0, d_min_item] = (df[item] - df[min_item]) / df[min_item]
         # df = df.drop([avg_item], axis=1)
     return df.drop(['cat_age_sex'], axis=1)
 
