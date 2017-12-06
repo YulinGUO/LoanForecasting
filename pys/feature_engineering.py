@@ -43,13 +43,24 @@ def add_dow_features(train, submit):
     submit = submit.join(submit_param[cols_svd_name + cols_extra_name])
     return train, submit
 
+def add_svd_features(train, submit):
+    train_param = pd.read_csv(INPUT_PATH + "train_svd.csv")
+    submit_param = pd.read_csv(INPUT_PATH + "submit_svd.csv")
+    col_num = 10
+    name_basic = 'all_feature_svd_{}'
+    cols_svd_name = map(lambda x: name_basic.format(x), range(0, col_num))
+
+    train = train.join(train_param[cols_svd_name ])
+    submit = submit.join(submit_param[cols_svd_name])
+    return train, submit
+
 cat_features = ['age','sex','active_month', 'active_year', 'active_day_of_week', 'limit_get_promoted','limit_get_promoted_ever']
 
-num_features_row = ['limit', 'comsume_count', 'consume_amount', 'loan_amount', 'loan_count','plannum','click_count', 'actived_months']
+num_features_row = ['limit', 'consume_count', 'consume_amount', 'loan_amount', 'loan_count','plannum','click_count', 'actived_months']
 
 
- # num_features_all = ['limit', 'comsume_count', 'consume_amount', 'loan_amount', 'loan_count','plannum','click_count',
- # 'comsume_count_cum', 'consume_amount_cum', 'loan_amount_cum', 'loan_count_cum', 'click_count_cum',
+ # num_features_all = ['limit', 'consume_count', 'consume_amount', 'loan_amount', 'loan_count','plannum','click_count',
+ # 'consume_count_cum', 'consume_amount_cum', 'loan_amount_cum', 'loan_count_cum', 'click_count_cum',
  # 'plannum_cum', 'actived_months', 'avg_consume_amount_cum', 'median_consume_amount_cum',
  # 'dev_consume_amount_cum',
  # 'dev_median_consume_amount_cum',

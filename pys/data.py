@@ -42,17 +42,17 @@ def load_data():
     # orders
     orders['Date'] = pd.to_datetime(orders['buy_time'], errors='coerce')
     orders['transaction_month'] = orders['Date'].dt.month
-    orders["comsume_count"] = 1
+    orders["consume_count"] = 1
     orders["consume_amount"] = orders["price"] * orders["qty"] - orders["discount"]
-    # fill comsume amount with 0
+    # fill consume amount with 0
     orders.consume_amount = orders.consume_amount.fillna(0)
     # remove outliers : number 16502
     ulimit = np.percentile(orders.consume_amount.values, 99.9)
     llimit = 0
     orders = orders[orders.consume_amount > llimit]
     orders = orders[orders.consume_amount < ulimit]
-    orders_new = orders.groupby(by=["uid", "transaction_month"], as_index=False)["consume_amount", "comsume_count"].sum()
-    orders_new = orders_new.pivot_table(['consume_amount', "comsume_count"], ['uid'], 'transaction_month', fill_value=0)
+    orders_new = orders.groupby(by=["uid", "transaction_month"], as_index=False)["consume_amount", "consume_count"].sum()
+    orders_new = orders_new.pivot_table(['consume_amount', "consume_count"], ['uid'], 'transaction_month', fill_value=0)
     orders_new.reset_index(drop=False, inplace=True)
     orders_new.columns = ['{}_{}'.format(i[1], i[0]) for i in orders_new.columns]
     orders_new = orders_new.rename(index=str, columns={"_uid": "uid"})

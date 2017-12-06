@@ -8,7 +8,7 @@ import numpy as np
 
 INPUT_PATH = '../input/'
 OUTPUT_PATH = '../output/'
-CC = '{}_comsume_count'
+CC = '{}_consume_count'
 CM = '{}_consume_amount'
 LM = '{}_loan_amount'
 LC = '{}_loan_count'
@@ -24,6 +24,9 @@ TARGET = 'target'
 GPTM = "{}_limit_get_promoted"
 GPE = "{}_limit_get_promoted_ever"
 
+arr = ['consume_amount_cum', 'loan_amount_cum', 'loan_amount', 'click_count_cum', 'click_count', 
+'limit','actived_months','lmp_reste','lmp_pay']
+#'lm_cum_per_loan_cum','lm_cum_per_plan_cum','lm_per_plan','cm_per_cc'
 
 def load_data():
     """Return ."""
@@ -46,10 +49,9 @@ def load_data():
     df8 = get_df_by_month(user_info, '8')
     df8 = rename_12_sum(df8)
     # to modify
-    # df8[CC.format(8) + CUM] = df8['comsume_counts_sum'] / 4
-    # df8[CM.format(8) + CUM] = df8['comsume_amounts_sum'] / 4
+    # df8[CC.format(8) + CUM] = df8['consume_counts_sum'] / 4
+    # df8[CM.format(8) + CUM] = df8['consume_amounts_sum'] / 4
     # df8[CKC.format(8) + CUM] = df8['click_counts_sum'] / 4
-    
     df8[CC.format(8) + CUM] = (user_info[CC.format(8)] + user_info[CC.format(10)] +  user_info[CC.format(11)])/ 3
     df8[CM.format(8) + CUM] = (user_info[CM.format(8)] + user_info[CM.format(10)] + user_info[CM.format(11)]) / 3
     df8[CKC.format(8) + CUM] = (user_info[CKC.format(8)] + user_info[CKC.format(10)] + user_info[CKC.format(11)]) / 3
@@ -58,6 +60,7 @@ def load_data():
     df8[PM.format(8) + CUM] = (user_info[PM.format(8)] + user_info[PM.format(10)] + user_info[PM.format(11)]) / 3
     df8 = add_target_by_month(df8, 8, user_info)
     df8 = df8.rename(columns=remove_month_rename)
+    df8 = add_combine_features(df8)
     df8 = add_devs(df8)
     df8 = add_devs_with3cat(df8)
     df8 = add_devs_another(df8)
@@ -67,6 +70,7 @@ def load_data():
     df9 = rename_12_sum(df9)
     df9 = add_target_by_month(df9, 9, user_info)
     df9 = df9.rename(columns=remove_month_rename)
+    df9 = add_combine_features(df9)
     df9 = add_devs(df9)
     df9 = add_devs_with3cat(df9)
     df9 = add_devs_another(df9)
@@ -76,6 +80,7 @@ def load_data():
     df10 = rename_12_sum(df10)
     df10 = add_target_by_month(df10, 10, user_info)
     df10 = df10.rename(columns=remove_month_rename)
+    df10 = add_combine_features(df10)
     df10 = add_devs(df10)
     df10 = add_devs_with3cat(df10)
     df10 = add_devs_another(df10)
@@ -84,10 +89,12 @@ def load_data():
     df11 = get_df_by_month(user_info, '11')
     df11 = rename_12_sum(df11)
     df11 = df11.rename(columns=remove_month_rename)
+    df11 = add_combine_features(df11)
     df11 = add_devs(df11)
     df11 = add_devs_with3cat(df11)
     df11 = add_devs_another(df11)
     df11 = add_devs_date(df11)
+
 
     frames = [df8, df9, df10]
     # frames = [df9, df10]
@@ -193,8 +200,8 @@ def remove_month_rename(col_name):
 def rename_12_sum(df):
     """Return ."""
     df = df.rename(
-     columns={'12_comsume_count_cum': "comsume_counts_sum",
-     '12_consume_amount_cum': "comsume_amounts_sum",
+     columns={'12_consume_count_cum': "consume_counts_sum",
+     '12_consume_amount_cum': "consume_amounts_sum",
 #     '12_loan_amount_cum': "loan_amounts_sum",
      # '12_loan_count_cum': "loan_counts_sum",
      '12_click_count_cum': "click_counts_sum"})
@@ -228,12 +235,11 @@ def set_actived_month_num(user_info):
 
 def add_devs(df):
     """Return ."""
-    # arr = ['comsume_count', 'consume_amount', 'loan_amount', 'loan_count', 'plannum', 'click_count']
+    # arr = ['consume_count', 'consume_amount', 'loan_amount', 'loan_count', 'plannum', 'click_count']
     # got worse : plannum,loan_count
     # arr = ['consume_amount_cum', 'loan_amount_cum', 'loan_amount', 'click_count_cum', 'click_counts_sum',
-    # 'click_count','comsume_amounts_sum']
-    arr = ['consume_amount_cum', 'loan_amount_cum', 'loan_amount', 'click_count_cum', 'click_count', 
-    'limit','actived_months','lmp_reste','lmp_pay']
+    # 'click_count','consume_amounts_sum']
+
     df['cat_age_sex'] = df[['age', 'sex']].astype(str).apply(lambda x: '_'.join(x), axis=1)
     AVG_ITEM = 'avg_{}'
     DEV_ITEM = 'dev_{}'
@@ -277,12 +283,10 @@ def add_devs(df):
 
 def add_devs_another(df):
     """Return ."""
-    # arr = ['comsume_count', 'consume_amount', 'loan_amount', 'loan_count', 'plannum', 'click_count']
+    # arr = ['consume_count', 'consume_amount', 'loan_amount', 'loan_count', 'plannum', 'click_count']
     # got worse : plannum,loan_count
     # arr = ['consume_amount_cum', 'loan_amount_cum', 'loan_amount', 'click_count_cum', 'click_counts_sum',
-    # 'click_count','comsume_amounts_sum']
-    arr = ['consume_amount_cum', 'loan_amount_cum', 'loan_amount', 'click_count_cum', 'click_count', 
-    'limit','actived_months','lmp_reste','lmp_pay']
+    # 'click_count','consume_amounts_sum']
     df['cat_age_sex'] = df[['sex', 'limit']].astype(str).apply(lambda x: '_'.join(x), axis=1)
     AVG_ITEM = 'avg_sl_{}'
     DEV_ITEM = 'dev_sl_{}'
@@ -326,12 +330,10 @@ def add_devs_another(df):
 
 def add_devs_third(df):
     """Return ."""
-    # arr = ['comsume_count', 'consume_amount', 'loan_amount', 'loan_count', 'plannum', 'click_count']
+    # arr = ['consume_count', 'consume_amount', 'loan_amount', 'loan_count', 'plannum', 'click_count']
     # got worse : plannum,loan_count
     # arr = ['consume_amount_cum', 'loan_amount_cum', 'loan_amount', 'click_count_cum', 'click_counts_sum',
-    # 'click_count','comsume_amounts_sum']
-    arr = ['consume_amount_cum', 'loan_amount_cum', 'loan_amount', 'click_count_cum', 'click_count', 
-    'limit','actived_months','lmp_reste','lmp_pay']
+    # 'click_count','consume_amounts_sum']
     df['cat_age_sex'] = df[['age', 'limit']].astype(str).apply(lambda x: '_'.join(x), axis=1)
     AVG_ITEM = 'avg_al_{}'
     DEV_ITEM = 'dev_al_{}'
@@ -375,12 +377,10 @@ def add_devs_third(df):
 
 def add_devs_with3cat(df):
     """Return ."""
-    # arr = ['comsume_count', 'consume_amount', 'loan_amount', 'loan_count', 'plannum', 'click_count']
+    # arr = ['consume_count', 'consume_amount', 'loan_amount', 'loan_count', 'plannum', 'click_count']
     # got worse : plannum,loan_count
     # arr = ['consume_amount_cum', 'loan_amount_cum', 'loan_amount', 'click_count_cum', 'click_counts_sum',
-    # 'click_count','comsume_amounts_sum']
-    arr = ['consume_amount_cum', 'loan_amount_cum', 'loan_amount', 'click_count_cum', 'click_count', 
-    'limit','actived_months','lmp_reste','lmp_pay']
+    # 'click_count','consume_amounts_sum']
     df['cat_age_sex'] = df[['age', 'sex', 'limit']].astype(str).apply(lambda x: '_'.join(x), axis=1)
     AVG_ITEM = 'avg_three_{}'
     DEV_ITEM = 'dev_three_{}'
@@ -424,12 +424,10 @@ def add_devs_with3cat(df):
 
 def add_devs_sex(df):
     """Return ."""
-    # arr = ['comsume_count', 'consume_amount', 'loan_amount', 'loan_count', 'plannum', 'click_count']
+    # arr = ['consume_count', 'consume_amount', 'loan_amount', 'loan_count', 'plannum', 'click_count']
     # got worse : plannum,loan_count
     # arr = ['consume_amount_cum', 'loan_amount_cum', 'loan_amount', 'click_count_cum', 'click_counts_sum',
-    # 'click_count','comsume_amounts_sum']
-    arr = ['consume_amount_cum', 'loan_amount_cum', 'loan_amount', 'click_count_cum', 'click_count', 
-    'limit','actived_months','lmp_reste','lmp_pay']
+    # 'click_count','consume_amounts_sum']
     df['cat_age_sex'] = df[['limit']].astype(str).apply(lambda x: '_'.join(x), axis=1)
     AVG_ITEM = 'avg_sex_{}'
     DEV_ITEM = 'dev_sex_{}'
@@ -473,12 +471,10 @@ def add_devs_sex(df):
 
 def add_devs_date(df):
     """Return ."""
-    # arr = ['comsume_count', 'consume_amount', 'loan_amount', 'loan_count', 'plannum', 'click_count']
+    # arr = ['consume_count', 'consume_amount', 'loan_amount', 'loan_count', 'plannum', 'click_count']
     # got worse : plannum,loan_count
     # arr = ['consume_amount_cum', 'loan_amount_cum', 'loan_amount', 'click_count_cum', 'click_counts_sum',
-    # 'click_count','comsume_amounts_sum']
-    arr = ['consume_amount_cum', 'loan_amount_cum', 'loan_amount', 'click_count_cum', 'click_count', 
-    'limit','actived_months','lmp_reste','lmp_pay']
+    # 'click_count','consume_amounts_sum']
     df['cat_age_sex'] = df[['active_year', 'active_month']].astype(str).apply(lambda x: '_'.join(x), axis=1)
     AVG_ITEM = 'avg_date_{}'
     DEV_ITEM = 'dev_date_{}'
@@ -519,6 +515,47 @@ def add_devs_date(df):
         # df.loc[df[min_item]<> 0, d_min_item] = (df[item] - df[min_item]) / df[min_item]
         # df = df.drop([avg_item], axis=1)
     return df.drop(['cat_age_sex'], axis=1)
+
+
+def add_combine_features(df):
+    # 'loan_count,loan_count_cum,plannum,plannum_cum,loan_amount,loan_count'
+    df['lc_per_plannum'] = 0
+    df['lc_cum_per_plannum_cum'] = 0
+    df['lm_per_loan'] = 0
+    df['lm_cum_per_loan_cum'] = 0
+    df['lm_per_plan'] = 0
+    df['lm_cum_per_plan_cum'] = 0
+
+    df['cm_per_cc'] = 0
+    df['cm_cum_per_cc_cum'] = 0
+
+    # df['comc_per_plannum'] = 0 -> useless
+    # df['comc_cum_per_plannum_cum'] = 0-> useless
+    # df['cc_per_loanc'] = 0-> useless
+    # df['cc_cum_per_loanc_cum'] = 0-> useless
+    # df['conm_per_loanm'] = 0
+    # df['conm_cum_per_loanm_cum'] = 0
+
+    # df['clc_per_comc'] = 0
+    # df['clc_cum_per_comc_cum'] = 0
+    df.loc[df['plannum'] <> 0, 'lc_per_plannum'] = df['loan_count']/df['plannum']
+    df.loc[df['plannum_cum'] <> 0, 'lc_cum_per_plannum_cum'] = df['loan_count_cum'] / df['plannum_cum']
+    df.loc[df['loan_count'] <> 0, 'lm_per_loan'] = df['loan_amount'] / df['loan_count']
+    df.loc[df['loan_count_cum'] <> 0, 'lm_cum_per_loan_cum'] = df['loan_amount_cum'] / df['loan_count_cum']
+    df.loc[df['plannum'] <> 0, 'lm_per_plan'] = df['loan_amount'] / df['plannum']
+    df.loc[df['plannum_cum'] <> 0, 'lm_cum_per_plan_cum'] = df['loan_amount_cum'] / df['plannum_cum']
+
+    df.loc[df['consume_count'] <> 0, 'cm_per_cc'] = df['consume_amount'] / df['consume_count']
+    df.loc[df['consume_amount_cum'] <> 0, 'cm_cum_per_cc_cum'] = df['consume_amount_cum'] / df['consume_count_cum']
+    # df.loc[df['plannum'] <> 0, 'comc_per_plannum'] = df['consume_count'] / df['plannum']
+    # df.loc[df['plannum_cum'] <> 0, 'comc_cum_per_plannum_cum'] = df['consume_count_cum'] / df['plannum_cum']
+    
+    # df.loc[df['loan_count'] <> 0 ,'cc_per_loanc'] = df['consume_count'] / df['loan_count']
+    # df.loc[df['loan_count_cum'] <> 0 ,'cc_cum_per_loanc_cum'] = df['consume_count_cum'] / df['loan_count_cum']
+    # df.loc[df['loan_amount'] <> 0, 'conm_per_loanm'] = df['consume_amount'] / df['loan_amount']
+    # df.loc[df['loan_amount_cum'] <> 0, 'conm_cum_per_loanm_cum'] = df['consume_amount_cum'] / df['loan_amount_cum']
+
+    return df
 
 
 if __name__ == "__main__":
