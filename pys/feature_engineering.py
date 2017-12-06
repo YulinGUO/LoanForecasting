@@ -46,7 +46,7 @@ def add_dow_features(train, submit):
 def add_svd_features(train, submit):
     train_param = pd.read_csv(INPUT_PATH + "train_svd.csv")
     submit_param = pd.read_csv(INPUT_PATH + "submit_svd.csv")
-    col_num = 10
+    col_num = 2
     name_basic = 'all_feature_svd_{}'
     cols_svd_name = map(lambda x: name_basic.format(x), range(0, col_num))
 
