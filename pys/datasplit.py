@@ -23,6 +23,7 @@ ACTIVE_DOW = "active_day_of_week"
 TARGET = 'target'
 GPTM = "{}_limit_get_promoted"
 GPE = "{}_limit_get_promoted_ever"
+AVG = '_avg'
 
 arr = ['consume_amount_cum', 'loan_amount_cum', 'loan_amount', 'click_count_cum', 'click_count', 
 'limit','actived_months','lmp_reste','lmp_pay']
@@ -58,6 +59,14 @@ def load_data():
     df8[LM.format(8) + CUM] = (user_info[LM.format(8)] + user_info[LM.format(10)] +  user_info[LM.format(11)])/ 3
     df8[LC.format(8) + CUM] = (user_info[LC.format(8)] + user_info[LC.format(10)] + user_info[LC.format(11)]) / 3
     df8[PM.format(8) + CUM] = (user_info[PM.format(8)] + user_info[PM.format(10)] + user_info[PM.format(11)]) / 3
+
+    # df8[CC.format(8) + CUM + AVG] = df8[CC.format(8) + CUM]
+    # df8[CM.format(8) + CUM + AVG] = df8[CM.format(8) + CUM]
+    # df8[CKC.format(8) + CUM + AVG] = df8[CKC.format(8) + CUM]
+    # df8[LM.format(8) + CUM + AVG] = df8[LM.format(8) + CUM]
+    # df8[LC.format(8) + CUM + AVG] = df8[LC.format(8) + CUM]
+    # df8[PM.format(8) + CUM + AVG] = df8[PM.format(8) + CUM]
+
     df8 = add_target_by_month(df8, 8, user_info)
     df8 = df8.rename(columns=remove_month_rename)
     df8 = add_combine_features(df8)
@@ -65,6 +74,7 @@ def load_data():
     df8 = add_devs_with3cat(df8)
     df8 = add_devs_another(df8)
     df8 = add_devs_date(df8)
+    df8 = add_rank_features(df8)
 
     df9 = get_df_by_month(user_info, '9')
     df9 = rename_12_sum(df9)
@@ -75,6 +85,7 @@ def load_data():
     df9 = add_devs_with3cat(df9)
     df9 = add_devs_another(df9)
     df9 = add_devs_date(df9)
+    df9 = add_rank_features(df9)
 
     df10 = get_df_by_month(user_info, '10')
     df10 = rename_12_sum(df10)
@@ -85,6 +96,7 @@ def load_data():
     df10 = add_devs_with3cat(df10)
     df10 = add_devs_another(df10)
     df10 = add_devs_date(df10)
+    df10 = add_rank_features(df10)
 
     df11 = get_df_by_month(user_info, '11')
     df11 = rename_12_sum(df11)
@@ -94,7 +106,7 @@ def load_data():
     df11 = add_devs_with3cat(df11)
     df11 = add_devs_another(df11)
     df11 = add_devs_date(df11)
-
+    df11 = add_rank_features(df11)
 
     frames = [df8, df9, df10]
     # frames = [df9, df10]
@@ -150,6 +162,31 @@ def cummulate_data_by_month(df, month):
         df[ckc_cum] = df[ckc_cur] + df[ckc_bef]
         df[pm_cum] = df[pm_cur] + df[pm_bef]
         df.loc[df[gptm] <= df[gpe_bef], gpe] = df[gpe_bef]
+
+    # cc_cum_avg = CC.format(month) + CUM + AVG
+    # cm_cum_avg = CM.format(month) + CUM + AVG
+    # lm_cum_avg = LM.format(month) + CUM + AVG
+    # lc_cum_avg = LC.format(month) + CUM + AVG
+    # ckc_cum_avg = CKC.format(month) + CUM + AVG
+    # pm_cum_avg = PM.format(month) + CUM + AVG
+
+    # months = month - 8
+
+    # if month <> 12:
+    #     if month == 8:
+    #         df[cc_cum_avg] = 0
+    #         df[cm_cum_avg] = 0
+    #         df[lm_cum_avg] = 0
+    #         df[lc_cum_avg] = 0
+    #         df[ckc_cum_avg] = 0
+    #         df[pm_cum_avg] = 0
+    #     else:
+    #         df[cc_cum_avg] = df[cc_cum] / months
+    #         df[cm_cum_avg] = df[cm_cum] / months
+    #         df[lm_cum_avg] = df[lm_cum] / months
+    #         df[lc_cum_avg] = df[lc_cum] / months
+    #         df[ckc_cum_avg] = df[ckc_cum] / months
+    #         df[pm_cum_avg] = df[pm_cum] / months
 
     return df
 
@@ -557,6 +594,13 @@ def add_combine_features(df):
 
     return df
 
+def add_rank_features(df):
+    ranks = ['consume_count','loan_count','loan_amount','consume_amount']+['consume_count_cum','loan_count_cum','loan_amount_cum','consume_amount_cum']
+    RANK = '{}_rank'
+    for item in ranks:
+        ranks_f = RANK.format(item)
+        df[ranks_f] = df[item].rank(ascending=0)
+    return df
 
 if __name__ == "__main__":
     print('begin to load data')
