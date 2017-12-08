@@ -7,6 +7,9 @@ import pandas as pd
 INPUT_PATH = '../input/'
 OUTPUT_PATH = '../output/'
 
+def fun_mode(x):
+    counts = np.bincount(x)
+    return np.argmax(counts)
 
 def load_data():
 
@@ -26,14 +29,37 @@ def load_data():
     # loans
     loans['Date'] = pd.to_datetime(loans['loan_time'], errors='coerce')
     loans['transaction_month'] = loans['Date'].dt.month
+
+    loans = loans.merge(users, on='uid', how = 'left')
+    loans['active_date'] = pd.to_datetime(loans['active_date'], errors='coerce')
+
     # fill nan with 0
     loans["loan_count"] = 1
     loans.loan_amount = loans.loan_amount.fillna(0)
+    loans_pln = pd.DataFrame(loans.groupby(by=["uid", "transaction_month"], as_index=False)['plannum'].apply(fun_mode), columns=["pln"])
+    loans_pln = loans_pln.pivot_table(['pln'], ['uid'], 'transaction_month', fill_value=0)
+    loans_pln.reset_index(drop=False, inplace=True)
+    loans_pln.columns = ['{}_{}'.format(i[1], i[0]) for i in loans_pln.columns]
+    loans_pln = loans_pln.rename(index=str, columns={"_uid": "uid"})
+
+    loans['active_date'] = pd.to_datetime(loans['active_date'], errors='coerce')
+    loans['loan_day_active'] = (loans['Date'] - loans['active_date']).astype('timedelta64[D]')
+
+# loan amout,plannum median???
+    loans_date = loans.groupby(by=["uid", "transaction_month"], as_index=False)['loan_amount','plannum'].median()
+    loans_date = loans_date.pivot_table(['loan_amount','plannum'], ['uid'], 'transaction_month', fill_value=0)
+    loans_date.reset_index(drop=False, inplace=True)
+    loans_date.columns = ['{}_{}_{}'.format(i[1], i[0],'median') for i in loans_date.columns]
+    loans_date = loans_date.rename(index=str, columns={"_uid_median": "uid"})
+
     loans_new = loans.groupby(by=["uid", "transaction_month"], as_index=False)["loan_amount", "loan_count", 'plannum'].sum()
     loans_new = loans_new.pivot_table(['loan_amount', "loan_count", 'plannum'], ['uid'], 'transaction_month', fill_value=0)
     loans_new.reset_index(drop=False, inplace=True)
     loans_new.columns = ['{}_{}'.format(i[1], i[0]) for i in loans_new.columns]
     loans_new = loans_new.rename(index=str, columns={"_uid": "uid"})
+
+    loans_new = loans_new.merge(loans_pln, on="uid", how="left")
+    loans_new = loans_new.merge(loans_date, on="uid", how="left")
 
     t = loans_new.merge(loans_sum, on="uid", how="left")
     t["11_loan_amount"][pd.notnull(t.loan_sum)] = t.loan_sum
