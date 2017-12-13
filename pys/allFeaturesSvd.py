@@ -34,7 +34,6 @@ if __name__ == "__main__":
     
     features_to_remove = features_to_remove + std_zero_cols
 
-
     frames_f1 = [train, submit]
     all_data_uid = pd.concat(frames_f1)
     all_data_uid.reset_index(drop=True, inplace=True)

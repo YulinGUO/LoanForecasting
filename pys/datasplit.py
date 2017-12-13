@@ -74,7 +74,7 @@ def load_data():
     df8 = add_devs_with3cat(df8)
     df8 = add_devs_another(df8)
     df8 = add_devs_date(df8)
-    df8 = add_rank_features(df8)
+    #df8 = add_rank_features(df8)
 
     df9 = get_df_by_month(user_info, '9')
     df9 = rename_12_sum(df9)
@@ -85,7 +85,7 @@ def load_data():
     df9 = add_devs_with3cat(df9)
     df9 = add_devs_another(df9)
     df9 = add_devs_date(df9)
-    df9 = add_rank_features(df9)
+    #df9 = add_rank_features(df9)
 
     df10 = get_df_by_month(user_info, '10')
     df10 = rename_12_sum(df10)
@@ -96,7 +96,7 @@ def load_data():
     df10 = add_devs_with3cat(df10)
     df10 = add_devs_another(df10)
     df10 = add_devs_date(df10)
-    df10 = add_rank_features(df10)
+    #df10 = add_rank_features(df10)
 
     df11 = get_df_by_month(user_info, '11')
     df11 = rename_12_sum(df11)
@@ -106,7 +106,7 @@ def load_data():
     df11 = add_devs_with3cat(df11)
     df11 = add_devs_another(df11)
     df11 = add_devs_date(df11)
-    df11 = add_rank_features(df11)
+    #df11 = add_rank_features(df11)
 
     frames = [df8, df9, df10]
     # frames = [df9, df10]
